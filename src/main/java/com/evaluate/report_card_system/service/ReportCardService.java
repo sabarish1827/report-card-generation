@@ -1,10 +1,10 @@
 package com.evaluate.report_card_system.service;
 
 import com.evaluate.report_card_system.config.WeightConfig;
+import com.evaluate.report_card_system.request.UpdateMarkRequest;
 import com.evaluate.report_card_system.model.Exam;
 import com.evaluate.report_card_system.model.Student;
 import com.evaluate.report_card_system.model.Term;
-import com.evaluate.report_card_system.request.UpdateMarkRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -97,8 +97,16 @@ public class ReportCardService {
                 if (term.getTermName().equals(request.getTermName())) {
                     for (Exam exam : term.getExams()) {
                         if (exam.getExamName().equals(request.getExamName())) {
-                            logger.info("Updating marks for rollNumber={}, term={}, exam={}", student.getRollNumber(), request.getTermName(), request.getExamName());
-                            exam.setSubjectMarks(request.getSubjectMarks());
+                            logger.info("Updating marks for rollNumber={}, term={}, exam={}",
+                                    student.getRollNumber(), request.getTermName(), request.getExamName());
+
+                            var currentMarks = exam.getSubjectMarks();
+                            if (currentMarks == null) {
+                                currentMarks = new HashMap<>();
+                                exam.setSubjectMarks(currentMarks);
+                            }
+                            currentMarks.putAll(request.getSubjectMarks());
+
                             calculateScienceScore(exam);
                             term.setTermScore(calculateTermScore(term));
                             return;
